@@ -20,7 +20,7 @@ export default {
 					800: 'var(--color-gray-800, #333)',
 					850: 'var(--color-gray-850, #262626)',
 					900: 'var(--color-gray-900, #171717)',
-					950: 'var(--color-gray-950, #0d0d0d)'
+					950: 'var(--color-gray-950, #003163)'
 				}
 			},
 			typography: {
