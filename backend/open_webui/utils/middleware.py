@@ -1395,6 +1395,9 @@ async def process_chat_response(
                     choices = response_data.get("choices", [])
                     if choices and choices[0].get("message", {}).get("content"):
                         content = response_data["choices"][0]["message"]["content"]
+                        
+                        # Extract sources from external model response
+                        message_sources = response_data["choices"][0]["message"].get("sources", [])
 
                         if content:
                             await event_emitter(
@@ -1417,14 +1420,30 @@ async def process_chat_response(
                                 }
                             )
 
+                            # Emit sources if they exist
+                            if message_sources and len(message_sources) > 0:
+                                for source in message_sources:
+                                    await event_emitter(
+                                        {
+                                            "type": "source",
+                                            "data": source,
+                                        }
+                                    )
+
                             # Save message in the database
+                            message_data = {
+                                "role": "assistant",
+                                "content": content,
+                            }
+                            
+                            # Save sources to database if they exist
+                            if message_sources and len(message_sources) > 0:
+                                message_data["sources"] = message_sources
+                            
                             Chats.upsert_message_to_chat_by_id_and_message_id(
                                 metadata["chat_id"],
                                 metadata["message_id"],
-                                {
-                                    "role": "assistant",
-                                    "content": content,
-                                },
+                                message_data,
                             )
 
                             # Send a webhook notification if the user is not active
